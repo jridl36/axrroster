@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roster</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:#EDEFF1;
+    --board:#E2E5E8;
+    --card:#FFFFFF;
+    --ink:#1B2330;
+    --ink-soft:#5B6472;
+    --line:#CBD0D4;
+    --brass:#A9824F;
+    --brass-dark:#8C6B3F;
+    --font-display:'Oswald','Arial Narrow',sans-serif;
+    --font-body:'Inter',system-ui,-apple-system,sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  :focus-visible{ outline:2px solid var(--brass); outline-offset:2px; }
+
+  /* ---------- header ---------- */
+  .roster-header{
+    position:sticky; top:0; z-index:5;
+    background:var(--bg);
+    border-bottom:1px solid var(--line);
+    padding:18px 20px 14px;
+  }
+  .roster-header__top{
+    display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+    margin-bottom:12px;
+  }
+  .roster-title{
+    font-family:var(--font-display); font-weight:600;
+    font-size:1.5rem; letter-spacing:.03em; margin:0;
+  }
+  .roster-meta{
+    font-size:.82rem; color:var(--ink-soft);
+  }
+  .roster-controls{
+    display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+    margin-left:auto;
+  }
+  .roster-search{
+    border:1px solid var(--line); border-radius:8px;
+    padding:9px 12px; font-family:var(--font-body); font-size:.88rem;
+    background:#fff; min-width:200px; flex:1 1 200px; color:var(--ink);
+  }
+  .roster-sort{
+    border:1px solid var(--line); border-radius:8px;
+    padding:8px 10px; font-family:var(--font-body); font-size:.85rem;
+    background:#fff; color:var(--ink); cursor:pointer;
+  }
+  .roster-clear{
+    border:none; background:none; color:var(--brass-dark);
+    font-family:var(--font-body); font-size:.82rem; font-weight:500;
+    cursor:pointer; padding:4px 2px; text-decoration:underline;
+    text-decoration-color:transparent; transition:text-decoration-color .15s;
+  }
+  .roster-clear:hover{ text-decoration-color:var(--brass-dark); }
+
+  .roster-tags{
+    display:flex; gap:8px; flex-wrap:wrap;
+  }
+  .tag-chip{
+    display:inline-flex; align-items:center; gap:6px;
+    border:1px solid var(--line); background:#fff; border-radius:999px;
+    padding:6px 13px 6px 9px; font-family:var(--font-body); font-weight:500;
+    font-size:.8rem; color:var(--ink); cursor:pointer;
+    transition:background .15s,color .15s,border-color .15s;
+  }
+  .tag-chip .dot{ width:8px; height:8px; border-radius:50%; flex:none; }
+  .tag-chip[aria-pressed="true"]{
+    background:var(--brass); color:#fff; border-color:var(--brass-dark);
+  }
+  .tag-chip[aria-pressed="true"] .dot{ background:#fff !important; }
+
+  /* ---------- index tabs (rolodex) ---------- */
+  .index-rail{
+    display:flex; gap:4px; flex-wrap:wrap;
+    margin:14px 0 -1px; padding-left:2px;
+  }
+  .index-tab{
+    font-family:var(--font-display); font-weight:600; font-size:.8rem;
+    color:var(--ink-soft); background:var(--board);
+    border:1px solid var(--line); border-bottom:none;
+    border-radius:6px 10px 0 0; padding:5px 11px 6px;
+    cursor:pointer; transition:background .15s,color .15s;
+  }
+  .index-tab:hover{ color:var(--ink); }
+  .index-tab.active{
+    background:var(--brass); color:#fff; border-color:var(--brass-dark);
+  }
+
+  /* ---------- grid ---------- */
+  .roster-main{ padding:6px 20px 40px; }
+  .roster-flat-label{
+    font-size:.82rem; color:var(--ink-soft); margin:22px 0 12px;
+  }
+  .section-letter{
+    font-family:var(--font-display); font-weight:600; font-size:1.3rem;
+    letter-spacing:.05em; color:var(--ink); background:var(--board);
+    border:1px solid var(--line); border-radius:0 8px 8px 8px;
+    padding:5px 14px; display:inline-block; margin:26px 0 14px;
+    scroll-margin-top:150px;
+  }
+  .roster-grid{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+    gap:14px;
+  }
+  .roster-card{
+    background:var(--card); border:1px solid var(--line); border-radius:10px;
+    padding:13px; display:flex; flex-direction:column; gap:9px;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .roster-card:hover{
+    transform:translateY(-3px); box-shadow:0 8px 20px rgba(27,35,48,.10);
+  }
+  .roster-thumb{
+    width:100%; aspect-ratio:1/1; border-radius:8px; object-fit:cover;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-weight:600; font-size:1.7rem;
+    color:#fff; background-size:cover; background-position:center;
+  }
+  .roster-name{
+    font-family:var(--font-display); font-weight:600; font-size:1rem;
+    letter-spacing:.01em; margin:0;
+  }
+  .roster-role{ font-size:.8rem; color:var(--ink-soft); margin-top:-6px; }
+  .roster-pills{ display:flex; flex-wrap:wrap; gap:5px; margin-top:auto; }
+  .pill{
+    font-size:.68rem; font-weight:600; letter-spacing:.03em;
+    text-transform:uppercase; color:#fff; border-radius:999px;
+    padding:3px 9px; display:inline-block;
+  }
+  .pill.unassigned{
+    background:var(--board); color:var(--ink-soft); text-transform:none;
+    font-weight:500; letter-spacing:0;
+  }
+
+  .empty-state{
+    text-align:center; padding:60px 20px; color:var(--ink-soft);
+  }
+  .empty-state svg{ margin-bottom:10px; }
+  .empty-state p{ margin:0; font-size:.9rem; }
+
+  @media (prefers-reduced-motion:reduce){
+    .roster-card, .tag-chip, .index-tab, .roster-clear{ transition:none !important; }
+  }
+
+  @media (max-width:560px){
+    .roster-header__top{ flex-direction:column; align-items:flex-start; }
+    .roster-controls{ margin-left:0; width:100%; }
+    .roster-search{ min-width:0; width:100%; }
+  }
+</style>
+</head>
+<body>
+
+<header class="roster-header">
+  <div class="roster-header__top">
+    <div>
+      <h1 class="roster-title">Roster</h1>
+      <div class="roster-meta" id="rosterMeta" aria-live="polite"></div>
+    </div>
+    <div class="roster-controls">
+      <form role="search" style="flex:1 1 200px; min-width:0;" onsubmit="return false;">
+        <label for="rosterSearch" style="position:absolute; left:-9999px;">Search roster by name, role, or brand</label>
+        <input id="rosterSearch" class="roster-search" type="text" placeholder="Search name, role, or brand…">
+      </form>
+      <select id="rosterSort" class="roster-sort" aria-label="Sort roster">
+        <option value="name-asc">Name (A–Z)</option>
+        <option value="name-desc">Name (Z–A)</option>
+        <option value="brand">Brand (grouped)</option>
+      </select>
+      <button type="button" class="roster-clear" id="rosterClear">Clear filters</button>
+    </div>
+  </div>
+  <div class="roster-tags" id="rosterTags" aria-label="Filter by brand"></div>
+  <div class="index-rail" id="indexRail" aria-label="Jump to section"></div>
+</header>
+
+<main class="roster-main">
+  <div id="rosterGrid"></div>
+</main>
+
+<!-- People live in roster-data.js — edit that file to add or update anyone. -->
+<script src="roster-data.js"></script>
+<script>
+/* rosterData comes from roster-data.js, loaded above. */
+
+const PALETTE = ["#2F6F6D","#B25539","#3E4A82","#5E6E33","#73415F","#3E5066"];
+
+const allTags = [...new Set(rosterData.map(p=>p.tag).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+const tagColor = {};
+allTags.forEach((t,i)=> tagColor[t] = PALETTE[i % PALETTE.length]);
+
+function avatarColor(name){
+  let sum = 0;
+  for(const ch of name) sum += ch.charCodeAt(0);
+  return PALETTE[sum % PALETTE.length];
+}
+function initials(name){
+  return name.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join("");
+}
+function slug(s){
+  return s.toString().toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
+}
+
+const state = { query:"", activeTags:new Set(), sort:"name-asc" };
+
+/* ---------- elements ---------- */
+const els = {
+  search: document.getElementById("rosterSearch"),
+  sort: document.getElementById("rosterSort"),
+  clear: document.getElementById("rosterClear"),
+  tags: document.getElementById("rosterTags"),
+  rail: document.getElementById("indexRail"),
+  grid: document.getElementById("rosterGrid"),
+  meta: document.getElementById("rosterMeta"),
+};
+
+/* ---------- build static tag chips (one per brand, used for filtering) ---------- */
+allTags.forEach(tag=>{
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "tag-chip";
+  btn.setAttribute("aria-pressed","false");
+  const dot = document.createElement("span");
+  dot.className = "dot";
+  dot.style.background = tagColor[tag];
+  btn.appendChild(dot);
+  btn.appendChild(document.createTextNode(tag));
+  btn.addEventListener("click", ()=>{
+    if(state.activeTags.has(tag)) state.activeTags.delete(tag);
+    else state.activeTags.add(tag);
+    btn.setAttribute("aria-pressed", state.activeTags.has(tag) ? "true" : "false");
+    render();
+  });
+  els.tags.appendChild(btn);
+});
+
+/* ---------- filtering / sorting ---------- */
+function getFiltered(){
+  const q = state.query.trim().toLowerCase();
+  return rosterData.filter(p=>{
+    const matchesQuery = !q ||
+      p.name.toLowerCase().includes(q) ||
+      p.role.toLowerCase().includes(q) ||
+      (p.tag && p.tag.toLowerCase().includes(q));
+    const matchesTags = state.activeTags.size === 0 ||
+      (p.tag && state.activeTags.has(p.tag));
+    return matchesQuery && matchesTags;
+  });
+}
+function getSorted(list){
+  const copy = [...list];
+  if(state.sort === "name-asc") copy.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(state.sort === "name-desc") copy.sort((a,b)=>b.name.localeCompare(a.name));
+  else if(state.sort === "brand") copy.sort((a,b)=>
+    (a.tag || "\uffff").localeCompare(b.tag || "\uffff") || a.name.localeCompare(b.name)
+  );
+  return copy;
+}
+function groupKeyFor(p){
+  if(state.sort === "brand") return p.tag ? p.tag : "Unassigned";
+  return p.name[0].toUpperCase();
+}
+
+/* ---------- card builder ---------- */
+function buildCard(p){
+  const card = document.createElement("article");
+  card.className = "roster-card";
+
+  let thumb;
+  if(p.photo){
+    thumb = document.createElement("img");
+    thumb.className = "roster-thumb";
+    thumb.src = p.photo;
+    thumb.alt = p.name;
+    thumb.loading = "lazy";
+    thumb.onerror = ()=>{ thumb.replaceWith(buildInitials(p)); };
+  } else {
+    thumb = buildInitials(p);
+  }
+  card.appendChild(thumb);
+
+  const name = document.createElement("h3");
+  name.className = "roster-name";
+  name.textContent = p.name;
+  card.appendChild(name);
+
+  const role = document.createElement("div");
+  role.className = "roster-role";
+  role.textContent = p.role;
+  card.appendChild(role);
+
+  const pills = document.createElement("div");
+  pills.className = "roster-pills";
+  const pill = document.createElement("span");
+  if(p.tag){
+    pill.className = "pill";
+    pill.style.background = tagColor[p.tag];
+    pill.textContent = p.tag;
+  } else {
+    pill.className = "pill unassigned";
+    pill.textContent = "Unassigned";
+  }
+  pills.appendChild(pill);
+  card.appendChild(pills);
+
+  return card;
+}
+function buildInitials(p){
+  const div = document.createElement("div");
+  div.className = "roster-thumb";
+  div.style.background = avatarColor(p.name);
+  div.textContent = initials(p.name);
+  div.setAttribute("role","img");
+  div.setAttribute("aria-label", p.name);
+  return div;
+}
+
+/* ---------- empty state ---------- */
+function buildEmptyState(){
+  const wrap = document.createElement("div");
+  wrap.className = "empty-state";
+  wrap.innerHTML = `
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#5B6472" stroke-width="1.6">
+      <circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.5" y1="15.5" x2="21" y2="21"/>
+    </svg>
+    <p>No one matches that search. Try a different name, role, or clear the brand filters.</p>`;
+  return wrap;
+}
+
+/* ---------- main render ---------- */
+function render(){
+  const filtered = getFiltered();
+  const sorted = getSorted(filtered);
+
+  els.grid.innerHTML = "";
+  els.rail.innerHTML = "";
+  els.rail.style.display = "none";
+
+  els.meta.textContent = `${rosterData.length} people · ${allTags.length} brands`;
+
+  if(sorted.length === 0){
+    els.grid.appendChild(buildEmptyState());
+    return;
+  }
+
+  const countLine = document.createElement("div");
+  countLine.className = "roster-flat-label";
+  countLine.textContent = `Showing ${sorted.length} of ${rosterData.length} people`;
+  els.grid.appendChild(countLine);
+
+  const seenKeys = [];
+  let currentKey = null;
+  let currentGrid = null;
+
+  sorted.forEach(p=>{
+    const key = groupKeyFor(p);
+    if(key !== currentKey){
+      currentKey = key;
+      seenKeys.push(key);
+
+      const heading = document.createElement("h2");
+      heading.className = "section-letter";
+      heading.id = "section-" + slug(key);
+      heading.textContent = key;
+      els.grid.appendChild(heading);
+
+      currentGrid = document.createElement("div");
+      currentGrid.className = "roster-grid";
+      els.grid.appendChild(currentGrid);
+    }
+    currentGrid.appendChild(buildCard(p));
+  });
+
+  els.rail.style.display = "flex";
+  seenKeys.forEach(key=>{
+    const tab = document.createElement("button");
+    tab.type = "button";
+    tab.className = "index-tab";
+    tab.textContent = key;
+    tab.addEventListener("click", ()=>{
+      document.getElementById("section-" + slug(key)).scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        block:"start"
+      });
+    });
+    els.rail.appendChild(tab);
+  });
+}
+
+/* ---------- events ---------- */
+els.search.addEventListener("input", e=>{ state.query = e.target.value; render(); });
+els.sort.addEventListener("change", e=>{ state.sort = e.target.value; render(); });
+els.clear.addEventListener("click", ()=>{
+  state.query = ""; state.activeTags.clear(); state.sort = "name-asc";
+  els.search.value = ""; els.sort.value = "name-asc";
+  els.tags.querySelectorAll(".tag-chip").forEach(b=>b.setAttribute("aria-pressed","false"));
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
