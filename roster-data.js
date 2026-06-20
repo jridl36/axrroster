@@ -19,8 +19,8 @@
    ===================================================================== */
 
 const rosterData = [
- { name:"Jay Storm", role:"", photo:"https://pbs.twimg.com/profile_images/2058520499186171904/cVRniGX3_400x400.jpg", tag:"" },
-  { name:"Nick Storm", role:"", photo:"", tag:"" },
+ { name:"Jay Storm", role:"", photo:"https://files.catbox.moe/h6v5ct.png", tag:"" },
+  { name:"Nick Storm", role:"", photo:"", tag:"https://files.catbox.moe/h0bisr.png" },
   { name:"Aaron Winters", role:"", photo:"", tag:"" },
   { name:"MJF", role:"Maxwell Jacob Friedman", photo:"https://static.wixstatic.com/media/815952_2e1abd77a83d4f2ea2c66837d692ff12~mv2.jpg/v1/fill/w_268,h_268,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/rp-ph.jpg", tag:"AEW World Champion" },
   { name:"Adam Copeland", role:"Cope", photo:"https://static.wixstatic.com/media/815952_b8d28294e15b4dbe973477a4ff167487~mv2.jpg/v1/fill/w_238,h_238,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/rp-ph.jpg", tag:"AEW World Tag Team Champion" },
@@ -31,11 +31,11 @@ const rosterData = [
   { name:"Jon Moxley", role:"The Purveyor of Violence", photo:"", tag:"" },
   { name:"Kenny Omega", role:"The Cleaner", photo:"https://static.wixstatic.com/media/815952_17d7bea65cc94f31b758813403f281cf~mv2.jpg/v1/fill/w_238,h_238,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/rp-ph.jpg", tag:"" },
   { name:"Kazuchika Okada", role:"The Rainmaker", photo:"https://static.wixstatic.com/media/815952_3c02ae2915514917830965a50c90849c~mv2.jpg/v1/fill/w_238,h_238,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/rp-ph.jpg", tag:"" },
-  { name:"Will Ospreay", role:"The Aerial Assassin", photo:"", tag:"" },
+  { name:"Will Ospreay", role:"The Aerial Assassin", photo:"https://static.wixstatic.com/media/815952_e5acc36821e4423cb463b29b289d55d8~mv2.jpg/v1/fill/w_238,h_238,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/rp-ph.jpg", tag:"" },
   { name:"Swerve Strickland", role:"Whose House?", photo:"", tag:"" },
   { name:"Samoa Joe", role:"The Samoan Submission Machine", photo:"", tag:"" },
   { name:"Orange Cassidy", role:"Freshly Squeezed", photo:"", tag:"" },
-  { name:"Ricochet", role:"The One and Only", photo:"", tag:"" },
+  { name:"Ricochet", role:"The One and Only", photo:"https://static.wixstatic.com/media/815952_87f4b834f7554b868bb9e94e03995b55~mv2.jpg/v1/fill/w_238,h_238,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/rp-ph.jpg", tag:"" },
   { name:"Bobby Lashley", role:"The Almighty", photo:"", tag:"" },
   { name:"Shelton Benjamin", role:"The Gold Standard", photo:"", tag:"" },
   { name:"MVP", role:"", photo:"", tag:"" },
@@ -47,7 +47,7 @@ const rosterData = [
   { name:"Cash Wheeler", role:"", photo:"", tag:"" },
   { name:"Matt Jackson", role:"", photo:"", tag:"" },
   { name:"Nick Jackson", role:"", photo:"", tag:"" },
-  { name:"Kyle Fletcher", role:"The Protostar", photo:"", tag:"" },
+  { name:"Kyle Fletcher", role:"The Protostar", photo:"https://static.wixstatic.com/media/815952_d089e72bb6df436295de9d3d0987e829~mv2.jpg/v1/fill/w_238,h_238,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/rp-ph.jpg", tag:"" },
   { name:"Konosuke Takeshita", role:"The Alpha", photo:"https://static.wixstatic.com/media/815952_036cafb4e2ea4a8d98529be934cea744~mv2.jpg/v1/fill/w_268,h_268,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/rp-ph.jpg", tag:"AEW International Champion" },
   { name:"Mark Davis", role:"Dunkzilla", photo:"", tag:"" },
   { name:"Kyle O'Reilly", role:"", photo:"", tag:"" },
