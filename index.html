@@ -31,6 +31,16 @@
 
   :focus-visible{ outline:2px solid var(--brass); outline-offset:2px; }
 
+  .champions-section{
+    background:var(--board); border-bottom:1px solid var(--line);
+    padding:24px 20px 26px;
+  }
+  .champions-title{
+    font-family:var(--font-display); font-weight:600; font-size:1.3rem;
+    letter-spacing:.04em; margin:0 0 4px;
+  }
+  .champions-meta{ font-size:.82rem; color:var(--ink-soft); margin-bottom:14px; }
+
   /* ---------- header ---------- */
   .roster-header{
     position:sticky; top:0; z-index:5;
@@ -163,6 +173,12 @@
 </style>
 </head>
 <body>
+
+<section class="champions-section" id="championsSection">
+  <h2 class="champions-title">Champions</h2>
+  <div class="champions-meta" id="championsMeta"></div>
+  <div class="roster-grid" id="championsGrid"></div>
+</section>
 
 <header class="roster-header">
   <div class="roster-header__top">
@@ -346,7 +362,9 @@ function render(){
   els.rail.innerHTML = "";
   els.rail.style.display = "none";
 
-  els.meta.textContent = `${rosterData.length} people · ${allTags.length} brands`;
+  els.meta.textContent = allTags.length > 0
+    ? `${rosterData.length} people · ${allTags.length} brand${allTags.length === 1 ? "" : "s"}`
+    : `${rosterData.length} people`;
 
   if(sorted.length === 0){
     els.grid.appendChild(buildEmptyState());
@@ -407,7 +425,26 @@ els.clear.addEventListener("click", ()=>{
   render();
 });
 
+/* ---------- champions panel ---------- */
+function renderChampions(){
+  const champions = rosterData.filter(p => p.tag).sort((a,b)=>a.name.localeCompare(b.name));
+  const section = document.getElementById("championsSection");
+
+  if(champions.length === 0){
+    section.style.display = "none";
+    return;
+  }
+
+  document.getElementById("championsMeta").textContent =
+    `${champions.length} ${champions.length === 1 ? "person" : "people"} allocated to a brand`;
+
+  const grid = document.getElementById("championsGrid");
+  grid.innerHTML = "";
+  champions.forEach(p => grid.appendChild(buildCard(p)));
+}
+
 render();
+renderChampions();
 </script>
 </body>
 </html>
