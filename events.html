@@ -170,6 +170,92 @@
     .events-controls{ margin-left:0; width:100%; }
     .events-search{ min-width:0; width:100%; }
   }
+
+  /* ---------- modal ---------- */
+  .modal-backdrop{
+    position:fixed; inset:0; z-index:100;
+    background:rgba(27,35,48,.45);
+    backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+    opacity:0; pointer-events:none;
+    transition:opacity .2s ease;
+  }
+  .modal-backdrop.is-open{
+    opacity:1; pointer-events:auto;
+  }
+  .modal{
+    background:var(--card); border:1px solid var(--line);
+    border-radius:14px; width:100%; max-width:500px;
+    overflow:hidden; display:flex; flex-direction:column;
+    transform:translateY(16px) scale(.97);
+    transition:transform .22s cubic-bezier(.22,1,.36,1);
+    box-shadow:0 20px 60px rgba(27,35,48,.22);
+  }
+  .modal-backdrop.is-open .modal{
+    transform:translateY(0) scale(1);
+  }
+  .modal-thumb{
+    width:100%; aspect-ratio:16/9; object-fit:cover;
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column; color:#fff; background-size:cover; background-position:center;
+  }
+  .modal-thumb .thumb-month{
+    font-family:var(--font-body); font-weight:600; font-size:1rem;
+    letter-spacing:.1em; opacity:.9;
+  }
+  .modal-thumb .thumb-day{
+    font-family:var(--font-display); font-weight:600; font-size:3.5rem;
+    line-height:1;
+  }
+  .modal-body{
+    padding:22px 24px 24px;
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .modal-header{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+  }
+  .modal-title{
+    font-family:var(--font-display); font-weight:600; font-size:1.45rem;
+    letter-spacing:.02em; margin:0; line-height:1.2;
+  }
+  .modal-close{
+    flex:none; border:none; background:var(--board); color:var(--ink-soft);
+    border-radius:50%; width:32px; height:32px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.1rem; line-height:1; transition:background .15s, color .15s;
+    margin-top:2px;
+  }
+  .modal-close:hover{ background:var(--line); color:var(--ink); }
+  .modal-details{
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .modal-detail-row{
+    display:flex; align-items:baseline; gap:10px;
+    font-size:.9rem;
+  }
+  .modal-detail-label{
+    font-weight:600; color:var(--ink-soft); font-size:.75rem;
+    letter-spacing:.07em; text-transform:uppercase;
+    min-width:68px; flex:none;
+  }
+  .modal-detail-value{
+    color:var(--ink);
+  }
+  .modal-pill{
+    display:inline-block;
+    font-size:.72rem; font-weight:600; letter-spacing:.04em;
+    text-transform:uppercase; color:#fff; background:var(--gold);
+    border-radius:999px; padding:4px 11px;
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .modal-backdrop, .modal{ transition:none !important; }
+  }
+  @media (max-width:560px){
+    .modal-backdrop{ align-items:flex-end; padding:0; }
+    .modal{ border-radius:14px 14px 0 0; max-width:100%; }
+  }
 </style>
 </head>
 <body>
@@ -200,6 +286,20 @@
 <main class="events-main">
   <div id="eventsGrid"></div>
 </main>
+
+<!-- Modal -->
+<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal" id="modal">
+    <div class="modal-thumb" id="modalThumb"></div>
+    <div class="modal-body">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle"></h2>
+        <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-details" id="modalDetails"></div>
+    </div>
+  </div>
+</div>
 
 <!-- Events live in events-data.js — edit that file to add or update any event. -->
 <script src="events-data.js"></script>
@@ -288,6 +388,11 @@ function groupKeyFor(e){
 function buildCard(e){
   const card = document.createElement("article");
   card.className = "event-card";
+  card.setAttribute("role","button");
+  card.setAttribute("tabindex","0");
+  card.style.cursor = "pointer";
+  card.addEventListener("click", ()=>{ lastFocused = card; openModal(e); });
+  card.addEventListener("keydown", ev=>{ if(ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); lastFocused = card; openModal(e); } });
 
   let thumb;
   if(e.thumbnail){
@@ -443,6 +548,80 @@ els.clear.addEventListener("click", ()=>{
   els.tags.querySelectorAll(".tag-chip").forEach(b=>b.setAttribute("aria-pressed","false"));
   render();
 });
+
+/* ---------- modal ---------- */
+const modalBackdrop = document.getElementById("modalBackdrop");
+const modalClose    = document.getElementById("modalClose");
+const modalTitle    = document.getElementById("modalTitle");
+const modalThumb    = document.getElementById("modalThumb");
+const modalDetails  = document.getElementById("modalDetails");
+let lastFocused = null;
+
+function openModal(e){
+  // Thumbnail
+  modalThumb.style.cssText = "";
+  modalThumb.innerHTML = "";
+  if(e.thumbnail){
+    modalThumb.style.backgroundImage = `url(${e.thumbnail})`;
+    modalThumb.style.backgroundSize  = "cover";
+    modalThumb.style.backgroundPosition = "center";
+  } else {
+    modalThumb.style.background = thumbColor(e.title);
+    const mo = document.createElement("div");
+    mo.className = "thumb-month";
+    mo.textContent = dateParts(e.date).toLocaleDateString(undefined,{month:"short"}).toUpperCase();
+    const dy = document.createElement("div");
+    dy.className = "thumb-day";
+    dy.textContent = dateParts(e.date).getDate();
+    modalThumb.appendChild(mo);
+    modalThumb.appendChild(dy);
+  }
+
+  modalTitle.textContent = e.title;
+  modalDetails.innerHTML = "";
+
+  const rows = [
+    { label:"Date",     value: formatDate(e.date), pill: false },
+    { label:"Location", value: e.location,          pill: false },
+    { label:"Tag",      value: e.tag || null,        pill: true  },
+  ];
+  rows.forEach(({label, value, pill})=>{
+    if(!value) return;
+    const row = document.createElement("div");
+    row.className = "modal-detail-row";
+    const lbl = document.createElement("span");
+    lbl.className = "modal-detail-label";
+    lbl.textContent = label;
+    const val = document.createElement("span");
+    val.className = "modal-detail-value";
+    if(pill){
+      const p = document.createElement("span");
+      p.className = "modal-pill";
+      p.textContent = value;
+      val.appendChild(p);
+    } else {
+      val.textContent = value;
+    }
+    row.appendChild(lbl);
+    row.appendChild(val);
+    modalDetails.appendChild(row);
+  });
+
+  modalBackdrop.classList.add("is-open");
+  lastFocused = document.activeElement;
+  modalClose.focus();
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal(){
+  modalBackdrop.classList.remove("is-open");
+  document.body.style.overflow = "";
+  if(lastFocused) lastFocused.focus();
+}
+
+modalClose.addEventListener("click", closeModal);
+modalBackdrop.addEventListener("click", ev=>{ if(ev.target === modalBackdrop) closeModal(); });
+document.addEventListener("keydown", ev=>{ if(ev.key === "Escape" && modalBackdrop.classList.contains("is-open")) closeModal(); });
 
 render();
 </script>
