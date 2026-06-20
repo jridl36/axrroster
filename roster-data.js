@@ -20,4 +20,6 @@
 
 const rosterData = [
   { name:"Jay Storm",     role:"",       photo:"https://pbs.twimg.com/profile_images/2058520499186171904/cVRniGX3_400x400.jpg", tag:"" },
+   { name:"Nick Storm",     role:"",       photo:"https://pbs.twimg.com/profile_images/2058520499186171904/cVRniGX3_400x400.jpg", tag:"" },
+   { name:"MjF",     role:"Maxwell Jacob Friedman",       photo:"https://pbs.twimg.com/profile_images/2058520499186171904/cVRniGX3_400x400.jpg", tag:"AEW World Champion" },
 ];
