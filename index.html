@@ -152,7 +152,7 @@
   .roster-pills{ display:flex; flex-wrap:wrap; gap:5px; margin-top:auto; }
   .pill{
     font-size:.68rem; font-weight:600; letter-spacing:.03em;
-    text-transform:uppercase; color:var(--ink); border-radius:999px;
+    text-transform:uppercase; color:#fff; border-radius:999px;
     padding:3px 9px; display:inline-block;
   }
   .empty-state{
@@ -287,8 +287,7 @@ function getSorted(list){
   return copy;
 }
 function groupKeyFor(p){
-  if(state.sort === "tag") return p.tag ? p.tag : "Unassigned";
-  return p.name[0].toUpperCase();
+  return p.tag ? p.tag : "Unassigned";
 }
 
 /* ---------- card builder ---------- */
@@ -377,43 +376,50 @@ function render(){
   countLine.textContent = `Showing ${sorted.length} of ${rosterData.length} people`;
   els.grid.appendChild(countLine);
 
-  const seenKeys = [];
-  let currentKey = null;
-  let currentGrid = null;
+  if(state.sort === "tag"){
+    const seenKeys = [];
+    let currentKey = null;
+    let currentGrid = null;
 
-  sorted.forEach(p=>{
-    const key = groupKeyFor(p);
-    if(key !== currentKey){
-      currentKey = key;
-      seenKeys.push(key);
+    sorted.forEach(p=>{
+      const key = groupKeyFor(p);
+      if(key !== currentKey){
+        currentKey = key;
+        seenKeys.push(key);
 
-      const heading = document.createElement("h2");
-      heading.className = "section-letter";
-      heading.id = "section-" + slug(key);
-      heading.textContent = key;
-      els.grid.appendChild(heading);
+        const heading = document.createElement("h2");
+        heading.className = "section-letter";
+        heading.id = "section-" + slug(key);
+        heading.textContent = key;
+        els.grid.appendChild(heading);
 
-      currentGrid = document.createElement("div");
-      currentGrid.className = "roster-grid";
-      els.grid.appendChild(currentGrid);
-    }
-    currentGrid.appendChild(buildCard(p));
-  });
-
-  els.rail.style.display = "flex";
-  seenKeys.forEach(key=>{
-    const tab = document.createElement("button");
-    tab.type = "button";
-    tab.className = "index-tab";
-    tab.textContent = key;
-    tab.addEventListener("click", ()=>{
-      document.getElementById("section-" + slug(key)).scrollIntoView({
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
-        block:"start"
-      });
+        currentGrid = document.createElement("div");
+        currentGrid.className = "roster-grid";
+        els.grid.appendChild(currentGrid);
+      }
+      currentGrid.appendChild(buildCard(p));
     });
-    els.rail.appendChild(tab);
-  });
+
+    els.rail.style.display = "flex";
+    seenKeys.forEach(key=>{
+      const tab = document.createElement("button");
+      tab.type = "button";
+      tab.className = "index-tab";
+      tab.textContent = key;
+      tab.addEventListener("click", ()=>{
+        document.getElementById("section-" + slug(key)).scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+          block:"start"
+        });
+      });
+      els.rail.appendChild(tab);
+    });
+  } else {
+    const grid = document.createElement("div");
+    grid.className = "roster-grid";
+    sorted.forEach(p=> grid.appendChild(buildCard(p)));
+    els.grid.appendChild(grid);
+  }
 }
 
 /* ---------- events ---------- */
