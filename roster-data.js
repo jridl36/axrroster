@@ -1,3 +1,4 @@
+
 /* =====================================================================
    ROSTER PEOPLE — this is the only file you need to touch to add,
    remove, or update people. The roster.html page reads this file
@@ -10,16 +11,15 @@
      name   – full name (required)
      role   – short title shown under their name
      photo  – a photo URL, or "" to show colored initials instead
-     tag    – the ONE brand they're allocated to. Use "" if they
-              aren't allocated to a brand yet — they'll show an
-              "Unassigned" pill so gaps are easy to spot.
+     tag    – the ONE tag for this person. Use "" if they don't have
+              a tag yet — their card just won't show a pill.
 
    You don't need to worry about a trailing comma on the last entry —
    JavaScript allows it either way.
    ===================================================================== */
 
 const rosterData = [
-  { name:"Jay Storm",     role:"",       photo:"https://pbs.twimg.com/profile_images/2058520499186171904/cVRniGX3_400x400.jpg", tag:"" },
+ { name:"Jay Storm",     role:"",       photo:"https://pbs.twimg.com/profile_images/2058520499186171904/cVRniGX3_400x400.jpg", tag:"" },
    { name:"Nick Storm",     role:"",       photo:"https://pbs.twimg.com/profile_images/2058520499186171904/cVRniGX3_400x400.jpg", tag:"" },
    { name:"MjF",     role:"Maxwell Jacob Friedman",       photo:"https://pbs.twimg.com/profile_images/2058520499186171904/cVRniGX3_400x400.jpg", tag:"AEW World Champion" },
 ];
