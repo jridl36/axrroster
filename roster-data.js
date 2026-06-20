@@ -19,5 +19,5 @@
    ===================================================================== */
 
 const rosterData = [
-  { name:"Jay Storm",     role:"",       photo:"", tag:"Champion" },
+  { name:"Jay Storm",     role:"",       photo:"https://pbs.twimg.com/profile_images/2058520499186171904/cVRniGX3_400x400.jpg", tag:"" },
 ];
