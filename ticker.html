@@ -20,10 +20,10 @@
     --font-body:'Inter',system-ui,-apple-system,sans-serif;
 
     /* tweak these to taste */
-    --ticker-height:120px;
-    --card-width:280px;
+    --ticker-height:260px;
+    --card-width:260px;
     --gap:16px;
-    --speed:35s; /* lower = faster */
+    --speed:40s; /* lower = faster */
   }
 
   *, *::before, *::after{ box-sizing:border-box; }
@@ -59,11 +59,11 @@
   /* the moving track — JS doubles the cards so it loops seamlessly */
   .ticker-track{
     display:flex;
-    align-items:center;
+    align-items:flex-start;
     gap:var(--gap);
     height:100%;
     width:max-content;
-    padding:0 var(--gap);
+    padding:12px var(--gap);
     animation:ticker-scroll var(--speed) linear infinite;
     will-change:transform;
   }
@@ -78,26 +78,25 @@
   .ticker-card{
     flex:none;
     width:var(--card-width);
-    height:88px;
     background:var(--card);
     border:1px solid var(--card-border);
     border-radius:10px;
     display:flex;
-    align-items:stretch;
+    flex-direction:column;
     overflow:hidden;
-    gap:0;
     cursor:default;
     transition:border-color .2s, box-shadow .2s;
   }
   .ticker-card:hover{
     border-color:var(--brass);
-    box-shadow:0 0 0 1px var(--brass), 0 8px 24px rgba(0,0,0,.35);
+    box-shadow:0 0 0 1px var(--brass), 0 8px 24px rgba(0,0,0,.15);
   }
 
-  /* left colour slab — shows the thumbnail or a date block */
+  /* top image at full 16:9 */
   .card-slab{
+    width:100%;
+    aspect-ratio:16/9;
     flex:none;
-    width:72px;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -105,13 +104,12 @@
     color:#fff;
     background-size:cover;
     background-position:center;
-    position:relative;
     overflow:hidden;
   }
   .card-slab .slab-month{
     font-family:var(--font-body);
     font-weight:600;
-    font-size:.6rem;
+    font-size:.75rem;
     letter-spacing:.1em;
     opacity:.85;
     text-transform:uppercase;
@@ -119,7 +117,7 @@
   .card-slab .slab-day{
     font-family:var(--font-display);
     font-weight:600;
-    font-size:1.8rem;
+    font-size:2.6rem;
     line-height:1;
   }
 
@@ -179,6 +177,7 @@
     border-radius:50%;
     background:var(--brass);
     opacity:.5;
+    align-self:center;
   }
 
   @media (prefers-reduced-motion:reduce){
