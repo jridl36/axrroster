@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upcoming Events</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:#FFFFFF;
+    --board:#E2E5E8;
+    --card:#FFFFFF;
+    --ink:#1B2330;
+    --ink-soft:#5B6472;
+    --line:#CBD0D4;
+    --brass:#A9824F;
+    --brass-dark:#8C6B3F;
+    --gold:#D4A017;
+    --font-display:'Oswald','Arial Narrow',sans-serif;
+    --font-body:'Inter',system-ui,-apple-system,sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  :focus-visible{ outline:2px solid var(--brass); outline-offset:2px; }
+
+  /* ---------- header ---------- */
+  .events-header{
+    position:sticky; top:0; z-index:5;
+    background:var(--bg);
+    border-bottom:1px solid var(--line);
+    padding:18px 20px 14px;
+  }
+  .events-header__top{
+    display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+    margin-bottom:12px;
+  }
+  .events-title{
+    font-family:var(--font-display); font-weight:600;
+    font-size:1.5rem; letter-spacing:.03em; margin:0;
+  }
+  .events-meta{
+    font-size:.82rem; color:var(--ink-soft);
+  }
+  .events-controls{
+    display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+    margin-left:auto;
+  }
+  .events-search{
+    border:1px solid var(--line); border-radius:8px;
+    padding:9px 12px; font-family:var(--font-body); font-size:.88rem;
+    background:#fff; min-width:200px; flex:1 1 200px; color:var(--ink);
+  }
+  .events-sort{
+    border:1px solid var(--line); border-radius:8px;
+    padding:8px 10px; font-family:var(--font-body); font-size:.85rem;
+    background:#fff; color:var(--ink); cursor:pointer;
+  }
+  .events-clear{
+    border:none; background:none; color:var(--brass-dark);
+    font-family:var(--font-body); font-size:.82rem; font-weight:500;
+    cursor:pointer; padding:4px 2px; text-decoration:underline;
+    text-decoration-color:transparent; transition:text-decoration-color .15s;
+  }
+  .events-clear:hover{ text-decoration-color:var(--brass-dark); }
+
+  .events-tags{
+    display:flex; gap:8px; flex-wrap:wrap;
+  }
+  .tag-chip{
+    display:inline-flex; align-items:center; gap:6px;
+    border:1px solid var(--line); background:#fff; border-radius:999px;
+    padding:6px 13px 6px 9px; font-family:var(--font-body); font-weight:500;
+    font-size:.8rem; color:var(--ink); cursor:pointer;
+    transition:background .15s,color .15s,border-color .15s;
+  }
+  .tag-chip .dot{ width:8px; height:8px; border-radius:50%; flex:none; background:var(--gold); }
+  .tag-chip[aria-pressed="true"]{
+    background:var(--brass); color:#fff; border-color:var(--brass-dark);
+  }
+  .tag-chip[aria-pressed="true"] .dot{ background:#fff !important; }
+
+  /* ---------- index tabs (tag-grouped jump rail) ---------- */
+  .index-rail{
+    display:flex; gap:4px; flex-wrap:wrap;
+    margin:14px 0 -1px; padding-left:2px;
+  }
+  .index-tab{
+    font-family:var(--font-display); font-weight:600; font-size:.8rem;
+    color:var(--ink-soft); background:var(--board);
+    border:1px solid var(--line); border-bottom:none;
+    border-radius:6px 10px 0 0; padding:5px 11px 6px;
+    cursor:pointer; transition:background .15s,color .15s;
+  }
+  .index-tab:hover{ color:var(--ink); }
+
+  /* ---------- grid ---------- */
+  .events-main{ padding:6px 20px 40px; }
+  .events-flat-label{
+    font-size:.82rem; color:var(--ink-soft); margin:22px 0 12px;
+  }
+  .section-tag{
+    font-family:var(--font-display); font-weight:600; font-size:1.3rem;
+    letter-spacing:.05em; color:var(--ink); background:var(--board);
+    border:1px solid var(--line); border-radius:0 8px 8px 8px;
+    padding:5px 14px; display:inline-block; margin:26px 0 14px;
+    scroll-margin-top:150px;
+  }
+  .events-grid{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+    gap:16px;
+  }
+  .event-card{
+    background:var(--card); border:1px solid var(--line); border-radius:10px;
+    padding:13px; display:flex; flex-direction:column; gap:9px;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .event-card:hover{
+    transform:translateY(-3px); box-shadow:0 8px 20px rgba(27,35,48,.10);
+  }
+  .event-thumb{
+    width:100%; aspect-ratio:16/9; border-radius:8px; object-fit:cover;
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column; color:#fff; background-size:cover; background-position:center;
+  }
+  .event-thumb .thumb-month{
+    font-family:var(--font-body); font-weight:600; font-size:.78rem;
+    letter-spacing:.08em; opacity:.9;
+  }
+  .event-thumb .thumb-day{
+    font-family:var(--font-display); font-weight:600; font-size:2.1rem;
+    line-height:1;
+  }
+  .event-title{
+    font-family:var(--font-display); font-weight:600; font-size:1rem;
+    letter-spacing:.01em; margin:0;
+  }
+  .event-meta{
+    font-size:.8rem; color:var(--ink-soft); margin-top:-6px;
+    display:flex; flex-wrap:wrap; gap:5px; align-items:baseline;
+  }
+  .event-meta .sep{ color:var(--line); }
+  .event-pills{ display:flex; flex-wrap:wrap; gap:5px; margin-top:auto; }
+  .pill{
+    font-size:.68rem; font-weight:600; letter-spacing:.03em;
+    text-transform:uppercase; color:#fff; background:var(--gold);
+    border-radius:999px; padding:3px 9px; display:inline-block;
+  }
+
+  .empty-state{
+    text-align:center; padding:60px 20px; color:var(--ink-soft);
+  }
+  .empty-state svg{ margin-bottom:10px; }
+  .empty-state p{ margin:0; font-size:.9rem; }
+
+  @media (prefers-reduced-motion:reduce){
+    .event-card, .tag-chip, .index-tab, .events-clear{ transition:none !important; }
+  }
+
+  @media (max-width:560px){
+    .events-header__top{ flex-direction:column; align-items:flex-start; }
+    .events-controls{ margin-left:0; width:100%; }
+    .events-search{ min-width:0; width:100%; }
+  }
+</style>
+</head>
+<body>
+
+<header class="events-header">
+  <div class="events-header__top">
+    <div>
+      <h1 class="events-title">Upcoming Events</h1>
+      <div class="events-meta" id="eventsMeta" aria-live="polite"></div>
+    </div>
+    <div class="events-controls">
+      <form role="search" style="flex:1 1 200px; min-width:0;" onsubmit="return false;">
+        <label for="eventsSearch" style="position:absolute; left:-9999px;">Search events by title, location, or tag</label>
+        <input id="eventsSearch" class="events-search" type="text" placeholder="Search title, location, or tag…">
+      </form>
+      <select id="eventsSort" class="events-sort" aria-label="Sort events">
+        <option value="date-asc">Date (soonest first)</option>
+        <option value="date-desc">Date (latest first)</option>
+        <option value="tag">Tag (grouped)</option>
+      </select>
+      <button type="button" class="events-clear" id="eventsClear">Clear filters</button>
+    </div>
+  </div>
+  <div class="events-tags" id="eventsTags" aria-label="Filter by tag"></div>
+  <div class="index-rail" id="indexRail" aria-label="Jump to section"></div>
+</header>
+
+<main class="events-main">
+  <div id="eventsGrid"></div>
+</main>
+
+<!-- Events live in events-data.js — edit that file to add or update any event. -->
+<script src="events-data.js"></script>
+<script>
+/* eventsData comes from events-data.js, loaded above. */
+
+const THUMB_PALETTE = ["#2F6F6D","#B25539","#3E4A82","#5E6E33","#73415F","#3E5066"];
+
+const allTags = [...new Set(eventsData.map(e=>e.tag).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+
+function slug(s){
+  return s.toString().toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
+}
+function dateParts(dateStr){
+  const [y,m,d] = dateStr.split("-").map(Number);
+  return new Date(y, m-1, d);
+}
+function formatDate(dateStr){
+  return dateParts(dateStr).toLocaleDateString(undefined,{ month:"short", day:"numeric", year:"numeric" });
+}
+function thumbColor(title){
+  let sum = 0;
+  for(const ch of title) sum += ch.charCodeAt(0);
+  return THUMB_PALETTE[sum % THUMB_PALETTE.length];
+}
+
+const state = { query:"", activeTags:new Set(), sort:"date-asc" };
+
+/* ---------- elements ---------- */
+const els = {
+  search: document.getElementById("eventsSearch"),
+  sort: document.getElementById("eventsSort"),
+  clear: document.getElementById("eventsClear"),
+  tags: document.getElementById("eventsTags"),
+  rail: document.getElementById("indexRail"),
+  grid: document.getElementById("eventsGrid"),
+  meta: document.getElementById("eventsMeta"),
+};
+
+/* ---------- build static tag chips ---------- */
+allTags.forEach(tag=>{
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "tag-chip";
+  btn.setAttribute("aria-pressed","false");
+  const dot = document.createElement("span");
+  dot.className = "dot";
+  btn.appendChild(dot);
+  btn.appendChild(document.createTextNode(tag));
+  btn.addEventListener("click", ()=>{
+    if(state.activeTags.has(tag)) state.activeTags.delete(tag);
+    else state.activeTags.add(tag);
+    btn.setAttribute("aria-pressed", state.activeTags.has(tag) ? "true" : "false");
+    render();
+  });
+  els.tags.appendChild(btn);
+});
+
+/* ---------- filtering / sorting ---------- */
+function getFiltered(){
+  const q = state.query.trim().toLowerCase();
+  return eventsData.filter(e=>{
+    const matchesQuery = !q ||
+      e.title.toLowerCase().includes(q) ||
+      e.location.toLowerCase().includes(q) ||
+      (e.tag && e.tag.toLowerCase().includes(q));
+    const matchesTags = state.activeTags.size === 0 ||
+      (e.tag && state.activeTags.has(e.tag));
+    return matchesQuery && matchesTags;
+  });
+}
+function getSorted(list){
+  const copy = [...list];
+  if(state.sort === "date-asc") copy.sort((a,b)=> a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
+  else if(state.sort === "date-desc") copy.sort((a,b)=> b.date.localeCompare(a.date) || a.title.localeCompare(b.title));
+  else if(state.sort === "tag") copy.sort((a,b)=>
+    (a.tag || "\uffff").localeCompare(b.tag || "\uffff") || a.date.localeCompare(b.date)
+  );
+  return copy;
+}
+function groupKeyFor(e){
+  return e.tag ? e.tag : "Unassigned";
+}
+
+/* ---------- card builder ---------- */
+function buildCard(e){
+  const card = document.createElement("article");
+  card.className = "event-card";
+
+  let thumb;
+  if(e.thumbnail){
+    thumb = document.createElement("img");
+    thumb.className = "event-thumb";
+    thumb.src = e.thumbnail;
+    thumb.alt = e.title;
+    thumb.loading = "lazy";
+    thumb.onerror = ()=>{ thumb.replaceWith(buildDateThumb(e)); };
+  } else {
+    thumb = buildDateThumb(e);
+  }
+  card.appendChild(thumb);
+
+  const title = document.createElement("h3");
+  title.className = "event-title";
+  title.textContent = e.title;
+  card.appendChild(title);
+
+  const meta = document.createElement("div");
+  meta.className = "event-meta";
+  const dateSpan = document.createElement("span");
+  dateSpan.textContent = formatDate(e.date);
+  const sep = document.createElement("span");
+  sep.className = "sep";
+  sep.textContent = "·";
+  const locSpan = document.createElement("span");
+  locSpan.textContent = e.location;
+  meta.appendChild(dateSpan);
+  meta.appendChild(sep);
+  meta.appendChild(locSpan);
+  card.appendChild(meta);
+
+  if(e.tag){
+    const pills = document.createElement("div");
+    pills.className = "event-pills";
+    const pill = document.createElement("span");
+    pill.className = "pill";
+    pill.textContent = e.tag;
+    pills.appendChild(pill);
+    card.appendChild(pills);
+  }
+
+  return card;
+}
+function buildDateThumb(e){
+  const div = document.createElement("div");
+  div.className = "event-thumb";
+  div.style.background = thumbColor(e.title);
+
+  const month = document.createElement("div");
+  month.className = "thumb-month";
+  month.textContent = dateParts(e.date).toLocaleDateString(undefined,{month:"short"}).toUpperCase();
+
+  const day = document.createElement("div");
+  day.className = "thumb-day";
+  day.textContent = dateParts(e.date).getDate();
+
+  div.appendChild(month);
+  div.appendChild(day);
+  div.setAttribute("role","img");
+  div.setAttribute("aria-label", e.title + ", " + formatDate(e.date));
+  return div;
+}
+
+/* ---------- empty state ---------- */
+function buildEmptyState(){
+  const wrap = document.createElement("div");
+  wrap.className = "empty-state";
+  wrap.innerHTML = `
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#5B6472" stroke-width="1.6">
+      <circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.5" y1="15.5" x2="21" y2="21"/>
+    </svg>
+    <p>No events match that search. Try a different title, location, or clear the tag filters.</p>`;
+  return wrap;
+}
+
+/* ---------- main render ---------- */
+function render(){
+  const filtered = getFiltered();
+  const sorted = getSorted(filtered);
+
+  els.grid.innerHTML = "";
+  els.rail.innerHTML = "";
+  els.rail.style.display = "none";
+
+  els.meta.textContent = allTags.length > 0
+    ? `${eventsData.length} events · ${allTags.length} tag${allTags.length === 1 ? "" : "s"}`
+    : `${eventsData.length} events`;
+
+  if(sorted.length === 0){
+    els.grid.appendChild(buildEmptyState());
+    return;
+  }
+
+  const countLine = document.createElement("div");
+  countLine.className = "events-flat-label";
+  countLine.textContent = `Showing ${sorted.length} of ${eventsData.length} events`;
+  els.grid.appendChild(countLine);
+
+  if(state.sort === "tag"){
+    const seenKeys = [];
+    let currentKey = null;
+    let currentGrid = null;
+
+    sorted.forEach(e=>{
+      const key = groupKeyFor(e);
+      if(key !== currentKey){
+        currentKey = key;
+        seenKeys.push(key);
+
+        const heading = document.createElement("h2");
+        heading.className = "section-tag";
+        heading.id = "section-" + slug(key);
+        heading.textContent = key;
+        els.grid.appendChild(heading);
+
+        currentGrid = document.createElement("div");
+        currentGrid.className = "events-grid";
+        els.grid.appendChild(currentGrid);
+      }
+      currentGrid.appendChild(buildCard(e));
+    });
+
+    els.rail.style.display = "flex";
+    seenKeys.forEach(key=>{
+      const tab = document.createElement("button");
+      tab.type = "button";
+      tab.className = "index-tab";
+      tab.textContent = key;
+      tab.addEventListener("click", ()=>{
+        document.getElementById("section-" + slug(key)).scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+          block:"start"
+        });
+      });
+      els.rail.appendChild(tab);
+    });
+  } else {
+    const grid = document.createElement("div");
+    grid.className = "events-grid";
+    sorted.forEach(e=> grid.appendChild(buildCard(e)));
+    els.grid.appendChild(grid);
+  }
+}
+
+/* ---------- events (UI) ---------- */
+els.search.addEventListener("input", e=>{ state.query = e.target.value; render(); });
+els.sort.addEventListener("change", e=>{ state.sort = e.target.value; render(); });
+els.clear.addEventListener("click", ()=>{
+  state.query = ""; state.activeTags.clear(); state.sort = "date-asc";
+  els.search.value = ""; els.sort.value = "date-asc";
+  els.tags.querySelectorAll(".tag-chip").forEach(b=>b.setAttribute("aria-pressed","false"));
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
