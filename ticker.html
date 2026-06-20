@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Events Ticker</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:#1B2330;
+    --card:#252E3E;
+    --card-border:rgba(255,255,255,.08);
+    --ink:#FFFFFF;
+    --ink-soft:rgba(255,255,255,.55);
+    --brass:#A9824F;
+    --gold:#D4A017;
+    --line:rgba(255,255,255,.1);
+    --font-display:'Oswald','Arial Narrow',sans-serif;
+    --font-body:'Inter',system-ui,-apple-system,sans-serif;
+
+    /* tweak these to taste */
+    --ticker-height:120px;
+    --card-width:280px;
+    --gap:16px;
+    --speed:35s; /* lower = faster */
+  }
+
+  *, *::before, *::after{ box-sizing:border-box; }
+  html, body{
+    margin:0; padding:0;
+    background:var(--bg);
+    overflow:hidden;
+    height:var(--ticker-height);
+  }
+
+  /* fade edges */
+  .ticker-wrap{
+    position:relative;
+    height:var(--ticker-height);
+    overflow:hidden;
+  }
+  .ticker-wrap::before,
+  .ticker-wrap::after{
+    content:'';
+    position:absolute; top:0; bottom:0; z-index:2;
+    width:80px;
+    pointer-events:none;
+  }
+  .ticker-wrap::before{
+    left:0;
+    background:linear-gradient(to right, var(--bg) 0%, transparent 100%);
+  }
+  .ticker-wrap::after{
+    right:0;
+    background:linear-gradient(to left, var(--bg) 0%, transparent 100%);
+  }
+
+  /* the moving track — JS doubles the cards so it loops seamlessly */
+  .ticker-track{
+    display:flex;
+    align-items:center;
+    gap:var(--gap);
+    height:100%;
+    width:max-content;
+    padding:0 var(--gap);
+    animation:ticker-scroll var(--speed) linear infinite;
+    will-change:transform;
+  }
+  .ticker-track:hover{ animation-play-state:paused; }
+
+  @keyframes ticker-scroll{
+    from{ transform:translateX(0); }
+    to  { transform:translateX(var(--scroll-dist)); }
+  }
+
+  /* individual card */
+  .ticker-card{
+    flex:none;
+    width:var(--card-width);
+    height:88px;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:10px;
+    display:flex;
+    align-items:stretch;
+    overflow:hidden;
+    gap:0;
+    cursor:default;
+    transition:border-color .2s, box-shadow .2s;
+  }
+  .ticker-card:hover{
+    border-color:var(--brass);
+    box-shadow:0 0 0 1px var(--brass), 0 8px 24px rgba(0,0,0,.35);
+  }
+
+  /* left colour slab — shows the thumbnail or a date block */
+  .card-slab{
+    flex:none;
+    width:72px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    background-size:cover;
+    background-position:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .card-slab .slab-month{
+    font-family:var(--font-body);
+    font-weight:600;
+    font-size:.6rem;
+    letter-spacing:.1em;
+    opacity:.85;
+    text-transform:uppercase;
+  }
+  .card-slab .slab-day{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:1.8rem;
+    line-height:1;
+  }
+
+  /* right text area */
+  .card-info{
+    flex:1;
+    padding:10px 12px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:4px;
+    min-width:0;
+  }
+  .card-title{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:.95rem;
+    letter-spacing:.01em;
+    color:var(--ink);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .card-date{
+    font-size:.72rem;
+    color:var(--ink-soft);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .card-loc{
+    font-size:.72rem;
+    color:var(--ink-soft);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .card-pill{
+    display:inline-block;
+    margin-top:2px;
+    font-size:.58rem;
+    font-weight:700;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:#fff;
+    background:var(--gold);
+    border-radius:999px;
+    padding:2px 7px;
+    align-self:flex-start;
+  }
+
+  /* separator dot between items */
+  .ticker-sep{
+    flex:none;
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:var(--brass);
+    opacity:.5;
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .ticker-track{ animation:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="ticker-wrap">
+  <div class="ticker-track" id="tickerTrack"></div>
+</div>
+
+<script src="events-data.js"></script>
+<script>
+const THUMB_PALETTE = ["#2F6F6D","#B25539","#3E4A82","#5E6E33","#73415F","#3E5066"];
+
+function thumbColor(title){
+  let sum = 0;
+  for(const ch of title) sum += ch.charCodeAt(0);
+  return THUMB_PALETTE[sum % THUMB_PALETTE.length];
+}
+function dateParts(dateStr){
+  const [y,m,d] = dateStr.split("-").map(Number);
+  return new Date(y, m-1, d);
+}
+function formatDate(dateStr){
+  return dateParts(dateStr).toLocaleDateString(undefined,{ month:"short", day:"numeric", year:"numeric" });
+}
+
+// Sort soonest first
+const sorted = [...eventsData].sort((a,b)=>a.date.localeCompare(b.date));
+
+function buildCard(e){
+  const card = document.createElement("div");
+  card.className = "ticker-card";
+
+  // slab
+  const slab = document.createElement("div");
+  slab.className = "card-slab";
+  if(e.thumbnail){
+    slab.style.backgroundImage = `url(${e.thumbnail})`;
+    const img = new Image();
+    img.onerror = ()=>{
+      slab.style.backgroundImage = "";
+      slab.style.background = thumbColor(e.title);
+      fillSlab(slab, e);
+    };
+    img.src = e.thumbnail;
+  } else {
+    slab.style.background = thumbColor(e.title);
+    fillSlab(slab, e);
+  }
+  card.appendChild(slab);
+
+  // info
+  const info = document.createElement("div");
+  info.className = "card-info";
+
+  const title = document.createElement("div");
+  title.className = "card-title";
+  title.textContent = e.title;
+  info.appendChild(title);
+
+  const date = document.createElement("div");
+  date.className = "card-date";
+  date.textContent = formatDate(e.date);
+  info.appendChild(date);
+
+  const loc = document.createElement("div");
+  loc.className = "card-loc";
+  loc.textContent = "📍 " + e.location;
+  info.appendChild(loc);
+
+  if(e.tag){
+    const pill = document.createElement("span");
+    pill.className = "card-pill";
+    pill.textContent = e.tag;
+    info.appendChild(pill);
+  }
+
+  card.appendChild(info);
+  return card;
+}
+
+function fillSlab(slab, e){
+  const mo = document.createElement("div");
+  mo.className = "slab-month";
+  mo.textContent = dateParts(e.date).toLocaleDateString(undefined,{month:"short"}).toUpperCase();
+  const dy = document.createElement("div");
+  dy.className = "slab-day";
+  dy.textContent = dateParts(e.date).getDate();
+  slab.appendChild(mo);
+  slab.appendChild(dy);
+}
+
+function buildSep(){
+  const s = document.createElement("div");
+  s.className = "ticker-sep";
+  return s;
+}
+
+const track = document.getElementById("tickerTrack");
+
+// Build one set of cards
+function buildSet(){
+  const frag = document.createDocumentFragment();
+  sorted.forEach((e, i)=>{
+    if(i > 0) frag.appendChild(buildSep());
+    frag.appendChild(buildCard(e));
+  });
+  frag.appendChild(buildSep()); // trailing sep before loop
+  return frag;
+}
+
+track.appendChild(buildSet());
+
+// Measure one set width, then duplicate until we have enough to fill seamlessly
+requestAnimationFrame(()=>{
+  const singleWidth = track.scrollWidth;
+
+  // Duplicate cards until we have at least 2x the viewport width beyond the original set
+  const minCopies = Math.ceil((window.innerWidth * 2) / singleWidth) + 1;
+  for(let i = 0; i < minCopies; i++){
+    track.appendChild(buildSet());
+  }
+
+  // The scroll distance is exactly one set width
+  track.style.setProperty("--scroll-dist", `-${singleWidth}px`);
+
+  // Restart animation so the timing is clean after DOM changes
+  track.style.animation = "none";
+  track.getBoundingClientRect(); // force reflow
+  track.style.animation = "";
+});
+</script>
+</body>
+</html>
