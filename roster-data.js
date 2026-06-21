@@ -80,5 +80,5 @@ const rosterData = [
   { name:"Mascara Dorada", role:"", photo:"", tag:"" },
   { name:"Rush", role:"El Toro Blanco", photo:"", tag:"" },
   { name:"Sammy Guevara", role:"The Spanish God", photo:"", tag:"" },
-  { name:"The Beast Mortos", role:"", photo:"", tag:"" },
+  { name:"Vacant Championship", role:"", photo:"https://files.catbox.moe/b27o9v.png", tag:"AXR TNT Championship" },
 ];
