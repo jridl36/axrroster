@@ -23,5 +23,5 @@
 const eventsData = [
   { title:"AXR Double or Nothing",     date:"2026-07-11", location:"New York City",     thumbnail:"https://files.catbox.moe/cs1au5.png", tag:"Premium Live Event" },
    { title:"AXR All In",     date:"2026-08-22", location:"London, England",     thumbnail:"https://files.catbox.moe/d65oda.png", tag:"Premium Live Event" },
-   { title:"AXR Dynamite: Debut Episode",     date:"TBA", location:"Jacksonville, FL",     thumbnail:"https://files.catbox.moe/267tfv.png", tag:"AXR Dynamite" },
+   { title:"AXR Dynamite: Debut Episode",     date:"2026-07-15", location:"Jacksonville, FL",     thumbnail:"https://files.catbox.moe/wq24j4.png", tag:"AXR Dynamite" },
 ];
