@@ -81,4 +81,7 @@ const rosterData = [
   { name:"Rush", role:"El Toro Blanco", photo:"https://files.catbox.moe/9m75lt.png", tag:"" },
   { name:"Sammy Guevara", role:"The Spanish God", photo:"https://files.catbox.moe/9m75lt.png", tag:"" },
   { name:"Vacant Championship", role:"", photo:"https://files.catbox.moe/b27o9v.png", tag:"AXR TNT Championship" },
+   { name:"Trent O'Day", role:"", photo:"https://files.catbox.moe/9lth06.png", tag:"" },
+   { name:"Bojack", role:"", photo:"https://files.catbox.moe/w4okql.png", tag:"" },
+   { name:"Crinddle Miller", role:"", photo:"https://files.catbox.moe/evt3pp.png", tag:"" },
 ];
